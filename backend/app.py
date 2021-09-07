@@ -53,7 +53,18 @@ def mirror(name):
 
 @app.route("/shows", methods=['GET'])
 def get_all_shows():
+    if 'minEpisodes' in request.args:
+        min_episodes = int(request.args.get('minEpisodes'))
+        shows = []
+        for i in db.get('shows'):
+            if i['episodes_seen']>=min_episodes:
+                shows.append(i)
+        #print(shows)
+        if not shows:
+            return create_response(status=404, message="no shows with "+str(min_episodes)+" or more episodes seen")
+        return create_response({"shows": shows})
     return create_response({"shows": db.get('shows')})
+    
 
 @app.route("/shows/<id>", methods=['DELETE'])
 def delete_show(id):
@@ -64,6 +75,43 @@ def delete_show(id):
 
 
 # TODO: Implement the rest of the API here!
+
+@app.route("/shows/<id>", methods=['GET'])
+def get_show(id):
+    if db.getById('shows',int(id)) is None:
+        return create_response(status=404, message="No show with this id exists")
+    return create_response({"shows": db.getById('shows',int(id))})
+
+
+@app.route("/shows",methods=['POST'])
+def new_show():
+    data = request.json
+    #print(data)
+    name = None
+    episodes_seen = None
+    if 'name' in data:
+        name = data['name']
+    if 'episodes_seen' in data:
+        episodes_seen = data['episodes_seen']
+
+    if not name and not episodes_seen:
+        return create_response(status=422, message="Missing show name and episode count")
+    if not name:
+        return create_response(status=422, message="Missing show name")
+    if not episodes_seen:
+        return create_response(status=422, message="Missing episode count")
+    return create_response(db.create('shows',data),status=201)
+
+@app.route("/shows/<id>",methods=['PUT'])
+def update_show(id):
+    if db.getById('shows',int(id)) is None:
+        return create_response(status=404, message="No show with this id exists")
+    data = request.json
+    return create_response(db.updateById('shows',int(id),data),status=201)
+
+
+
+
 
 """
 ~~~~~~~~~~~~ END API ~~~~~~~~~~~~
