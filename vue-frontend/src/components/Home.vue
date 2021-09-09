@@ -1,9 +1,14 @@
 <template>
   <div>
     <!-- PART 1: Pass in a "complete" prop here -->
-    <Instructions />
+    <Instructions v-bind:complete="true"/>
     <!-- PART 4: Modify the Show component to accept all of these props -->
+    <p>Add a new show!</p>
+    <input v-model="inputName" placeholder="edit me">
+    <p>Message is: {{ inputName }}</p>
+    <button type="button" v-on:click="submit">submit</button>
     <Show
+      
       v-for="show in shows"
       :key="show.id"
       :id="show.id"
@@ -18,11 +23,17 @@ import Instructions from "./Instructions.vue";
 import Show from "./Show.vue";
 
 export default {
+  props:{
+    inputName: {
+      type: String,
+      default: ""
+    }
+  },
   components: {
     Instructions,
     Show
   },
-  data() {
+  data(){
     return {
       shows: [
         { id: 1, name: "Game of Thrones", episodes_seen: 0 },
@@ -30,6 +41,16 @@ export default {
         { id: 3, name: "Black Mirror", episodes_seen: 3 }
       ]
     };
+  },
+  methods:{
+    submit: function(){
+      console.log('poop');
+      this.shows.push({id: this.shows.length+1, name: this.inputName, episodes_seen: 0})
+      //return {
+        // shows: {id: this.shows.length+1, name: inputName, episodes_seen: 0}
+      // }
+      
+    }
   }
 };
 </script>
